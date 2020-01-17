@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width,initial-scale=1.0">
+		<title>ValidaXML 2.0</title>
+		<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css"> 
+		<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+	</head>
+	<body>
+		<div id="app">
+			<div class="w3-bar w3-indigo w3-padding">
+				<h2>Validador de XML</h2>
+			</div> 
+			<div class="w3-container w3-margin">
+				<form>
+					 <label>XML</label>
+					 <textarea class="w3-input w3-border w3-margin-bottom" type="text" v-model.lazy="nota" placeholder="cole seu xml aqui"></textarea> 
+					 <button v-on:click.prevent="validarXML" class="w3-button w3-indigo w3-margin-bottom">Validar</button>
+				</form>
+				
+				<span>Dados da XML</span>
+				<hr/>
+				<div class="w3-panel w3-pale-blue w3-bottombar w3-border-blue w3-border">
+					<p>Produtos</p>
+				</div> 
+				<!-- TAG PROD -->
+				<div class="w3-bar w3-blue w3-padding-16" v-on:click="exibeTabelaProduto = !exibeTabelaProduto" style="cursor: pointer;">
+					<div class="w3-bar-item">TAG: PROD</div>
+					<div class="w3-bar-item">Total COM (qCom * vUnCom): {{ formataValor(totalComProd) }}</div>
+					<div class="w3-bar-item">Total TRIB (qTrib * vUnTrib): {{ formataValor(totalTribProd) }} </div>
+					<div class="w3-bar-item">Total FRETE (vFrete): {{ formataValor2Decimais(totalvFreteProd) }}</div>
+					<div class="w3-bar-item">Total DESCONTO (vDesc): {{ formataValor2Decimais(totalvDescProd) }}</div>
+					<div class="w3-bar-item">Total PRODUTO (vProd): {{ formataValor2Decimais(totalvProdProd) }}</div>
+				</div>
+				<table class="w3-table-all w3-hoverable w3-margin-bottom" id="tabelaQcom" v-show="exibeTabelaProduto">
+					<thead>
+						<tr class="w3-light-grey">
+							<th>#</th>
+							<th>Código Produto</th>
+							<th>qCom</th>
+							<th>qTrib</th>
+							<th>vUnCom</th>
+							<th>vUnTrib</th>
+							<th>TotalCom</th>
+							<th>TotalTrib</th>
+							<th>vProd</th>
+							<th>vFrete</th>
+							<th>vDesc</th>
+						</tr>
+					</thead>
+					<tbody id="tabelaQcomtbody">
+						<tr v-for="(produto, index) in produtos" :key="produto.cProd" :id="index" v-on:click="adicionaMarcacao(index)">
+							<th>{{ produto.nItem }}</th>
+							<th>{{ produto.cProd }}</th>
+							<th>{{ formataValor(produto.qCom) }}</th>
+							<th>{{ formataValor(produto.qTrib) }}</th>
+							<th>{{ formataValor(produto.vUnCom) }}</th>
+							<th>{{ formataValor(produto.vUnTrib) }}</th>
+							<th :class="[formataValor(produto.subTotalTrib) != formataValor(produto.vProd) ? errorClass : '']" >{{ formataValor2Decimais(produto.subTotalCom) }}</th>
+							<th :class="[formataValor(produto.subTotalTrib) != formataValor(produto.vProd) ? errorClassTrib : '']">{{ formataValor2Decimais(produto.subTotalTrib) }}</th>
+							<th>{{ formataValor2Decimais(produto.vProd) }}</th>
+							<th>{{ formataValor2Decimais(produto.vFrete) }}</th>
+							<th>{{ formataValor2Decimais(produto.vDesc) }}</th>
+						</tr>
+					</tbody>
+				</table>
+				
+				<!-- TAG IMPOSTO -->
+				<!-- ICMS -->
+				<!-- ICMS ST -->
+				<!-- IPI -->
+				<!-- IPI DEVOLVE -->
+				<div class="w3-bar w3-teal w3-padding-16 w3-margin-top" v-on:click="exibeTabelaProdutoImposto = !exibeTabelaProdutoImposto" style="cursor: pointer;">
+					<div class="w3-bar-item">TAG: IMPOSTO</div>
+					<div class="w3-bar-item">Total COM (qCom * vUnCom): {{ formataValor(totalComProd) }}</div>
+					<div class="w3-bar-item">Total TRIB (qTrib * vUnTrib): {{ formataValor(totalTribProd) }} </div>
+					<div class="w3-bar-item">Total FRETE (vFrete): {{ formataValor(totalvFreteProd) }}</div>
+					<div class="w3-bar-item">Total DESCONTO (vDesc): {{ formataValor(totalvDescProd) }}</div>
+					<div class="w3-bar-item">Total PRODUTO (vProd): {{ formataValor(totalvProdProd) }}</div>
+				</div>
+				<table class="w3-table-all w3-hoverable w3-margin-bottom" id="tabelaQcom" v-show="exibeTabelaProdutoImposto">
+					<thead>
+						<tr class="w3-light-grey">
+							<th>#</th>
+							<th>Código Produto</th>
+							<th>qCom</th>
+							<th>qTrib</th>
+							<th>vUnCom</th>
+							<th>vUnTrib</th>
+							<th>TotalCom</th>
+							<th>TotalTrib</th>
+							<th>vProd</th>
+							<th>vFrete</th>
+							<th>vDesc</th>
+						</tr>
+					</thead>
+					<tbody id="tabelaQcomtbody">
+						<tr v-for="produto in produtos" :key="produto.cProd">
+							<th>{{ produto.nItem }}</th>
+							<th>{{ produto.cProd }}</th>
+							<th>{{ formataValor(produto.qCom) }}</th>
+							<th>{{ formataValor(produto.qTrib) }}</th>
+							<th>{{ formataValor(produto.vUnCom) }}</th>
+							<th>{{ formataValor(produto.vUnTrib) }}</th>
+							<th :class="[formataValor(produto.subTotalTrib) != formataValor(produto.vProd) ? errorClass : '']">{{ formataValor2Decimais(produto.subTotalCom) }}</th>
+							<th :class="[formataValor(produto.subTotalTrib) != formataValor(produto.vProd) ? errorClassTrib : '']">{{ formataValor2Decimais(produto.subTotalTrib) }}</th>
+							<th>{{ formataValor2Decimais(produto.vProd) }}</th>
+							<th>{{ formataValor2Decimais(produto.vFrete) }}</th>
+							<th>{{ formataValor2Decimais(produto.vDesc) }}</th>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
+		<script>
+			var app = new Vue({
+				  el: '#app',
+				  data: {
+					totalProdCom: 0,
+					totalProdTrib: 0,
+					exibeTabelaProduto: false,
+					exibeTabelaProdutoImposto: false,
+					produtos: [],
+					nota: '',
+					totalComProd: 0,
+					totalTribProd: 0,
+					totalvFreteProd: 0,
+					totalvDescProd: 0,
+					totalvProdProd: 0,
+					errorClass: 'w3-text-red',
+					errorClassTrib: 'w3-text-blue'
+				  },
+				  methods:{
+					validarXML(){
+					this.limpaDados();
+					/* Montando o objeto a partir da XML */
+						parser = new DOMParser();
+						xmlDoc = parser.parseFromString(this.nota,"text/xml");
+						
+						var _cProd = xmlDoc.getElementsByTagName("cProd");
+						
+						var _qCom = xmlDoc.getElementsByTagName("qCom");
+						var _vUnCom = xmlDoc.getElementsByTagName("vUnCom");
+
+						var _qTrib = xmlDoc.getElementsByTagName("qTrib");
+						var _vUnTrib = xmlDoc.getElementsByTagName("vUnTrib");
+						
+						var _vProd = xmlDoc.getElementsByTagName("vProd");
+						var _vFrete = xmlDoc.getElementsByTagName("vFrete");
+						var _vDesc = xmlDoc.getElementsByTagName("vDesc");
+						
+						var _prod = xmlDoc.getElementsByTagName("prod");
+						
+						for(p=0; p < _prod.length; p++){
+							this.montaProduto(_prod[p]);
+						}
+					},
+					montaProduto(_prod){
+						var produto = {};
+						for(i=0; i < _prod.children.length; i++){
+							switch (_prod.children[i].tagName) {
+							  case 'cProd':
+								produto.cProd = _prod.children[i].innerHTML;
+								break;
+							  case 'qCom':
+								produto.qCom = _prod.children[i].innerHTML;
+								break;
+							  case 'vUnCom':
+								produto.vUnCom = _prod.children[i].innerHTML;
+								break;
+							  case 'qTrib':
+								produto.qTrib = _prod.children[i].innerHTML;
+								break;
+							  case 'vUnTrib':
+								produto.vUnTrib = _prod.children[i].innerHTML;
+								break;
+							  case 'vProd':
+								produto.vProd = _prod.children[i].innerHTML;
+								break;
+							  case 'vFrete':
+								produto.vFrete = _prod.children[i].innerHTML;
+								break;
+							  case 'vDesc':
+								produto.vDesc = _prod.children[i].innerHTML;
+								break;
+							  default:
+								break;
+							}
+						}
+						produto.nItem = this.produtos.length + 1;
+						//sub total qtidade vs unitario produto
+						produto.subTotalTrib = (parseFloat(produto.qTrib) * parseFloat(produto.vUnTrib));
+						produto.subTotalCom = (parseFloat(produto.qCom)   * parseFloat(produto.vUnCom));
+						
+						//total do subtotal dos produtos
+						this.totalComProd    = (parseFloat(produto.subTotalCom) + parseFloat(this.totalComProd));
+						this.totalTribProd   = (parseFloat(produto.subTotalTrib) + parseFloat(this.totalTribProd));
+						//total do subtotal dos produtos
+						this.totalvFreteProd = (parseFloat(produto.vFrete) + parseFloat(this.totalvFreteProd));
+						
+						this.totalvDescProd  = (parseFloat(produto.vDesc > 0 ? produto.vDesc : 0)  + parseFloat(this.totalvDescProd));
+						this.totalvProdProd  = (parseFloat(produto.vProd)  + parseFloat(this.totalvProdProd));
+												
+						
+						this.produtos.push(produto);
+					},
+					limpaDados(){
+						this.produtos 		=  [];
+						this.totalComProd    = 0;
+						this.totalTribProd   = 0;
+						this.totalvFreteProd = 0;
+						this.totalvDescProd  = 0;
+						this.totalvProdProd  = 0;
+					},
+					formataValor(valor){
+						if(!valor)
+							return '0.0000';
+						
+						return parseFloat(valor).toFixed(6);
+					},
+					
+					formataValor2Decimais(valor){
+						if(!valor)
+							return '0.00';
+						
+						return parseFloat(valor).toFixed(2);
+					},
+					adicionaMarcacao(index){
+						var element = document.getElementById(index);
+						element.classList.toggle("w3-pale-yellow");
+					}
+				  }
+				})
+		</script>
+	</body>
+</html>
